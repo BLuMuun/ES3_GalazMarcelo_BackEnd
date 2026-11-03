@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Despensa familiar</title>
+    <style>
+        :root { color-scheme: light; font-family: Arial, sans-serif; color: #20302d; background: #f3f6f4; }
+        body { max-width: 1100px; margin: 0 auto; padding: 28px 20px 48px; }
+        header, .panel { background: #fff; border: 1px solid #d8e2dd; border-radius: 12px; padding: 20px 24px; margin-bottom: 20px; }
+        header { display: flex; justify-content: space-between; align-items: center; gap: 20px; }
+        h1, h2 { margin-top: 0; }
+        h1 { margin-bottom: 5px; }
+        .muted { color: #5e6f69; }
+        .actions { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+        .button { display: inline-block; border: 0; border-radius: 7px; padding: 10px 14px; color: #fff; background: #236b52; text-decoration: none; cursor: pointer; font: inherit; }
+        .button.secondary { color: #20302d; background: #e8efeb; }
+        .button.danger { background: #a63838; }
+        .inline-form { display: inline; }
+        .message { border-radius: 7px; padding: 12px 14px; margin: 12px 0; background: #e8efeb; }
+        .message.warning, .message.error { color: #762626; background: #fbeaea; }
+        .message.success { color: #174b38; background: #e6f4ed; }
+        table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+        th, td { border-bottom: 1px solid #e0e7e3; text-align: left; padding: 11px 9px; vertical-align: top; }
+        th { color: #34564a; background: #f1f6f3; }
+        .empty { text-align: center; color: #64736d; padding: 22px; }
+        @media (max-width: 700px) { body { padding: 14px 10px 30px; } header { align-items: flex-start; flex-direction: column; } .table-wrap { overflow-x: auto; } }
+    </style>
+</head>
+<body>
+    <header>
+        <div>
+            <h1>📦 Despensa familiar</h1>
+            <div class="muted">Sesión: {{ request.user.username }}</div>
+        </div>
+        <div class="actions">
+            {% if puede_crear %}<a class="button" href="{% url 'crear' %}">Registrar retiro</a>{% endif %}
+            {% if user.is_staff %}<a class="button secondary" href="{% url 'admin:index' %}">Administración</a>{% endif %}
+            <form class="inline-form" method="post" action="{% url 'logout' %}">
+                {% csrf_token %}
+                <button class="button secondary" type="submit">Cerrar sesión</button>
+            </form>
+        </div>
+    </header>
+
+    {% for message in messages %}
+        <div class="message {{ message.tags }}" role="status">{{ message }}</div>
+    {% endfor %}
+
+    <section class="panel">
+        <h2>Stock disponible</h2>
+        <div class="table-wrap">
+            <table>
+                <thead><tr><th>Producto</th><th>Unidades disponibles</th></tr></thead>
+                <tbody>
+                    {% for producto in productos %}
+                        <tr><td>{{ producto.nombre }}</td><td>{{ producto.stock }}</td></tr>
+                    {% empty %}
+                        <tr><td class="empty" colspan="2">No hay productos en el inventario. Un administrador puede agregarlos desde Django Admin.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <section class="panel">
+        <h2>Historial de retiros</h2>
+        <div class="table-wrap">
+            <table>
+                <thead><tr><th>Fecha</th><th>Producto</th><th>Cantidad solicitada</th><th>Resultado</th>{% if puede_administrar %}<th>Acciones</th>{% endif %}</tr></thead>
+                <tbody>
+                    {% for reg in registros %}
+                        <tr>
+                            <td>{{ reg.fecha|date:"d/m/Y H:i" }}</td>
+                            <td>{{ reg.producto }}</td>
+                            <td>{{ reg.cantidad_solicitada }}</td>
+                            <td>{{ reg.resultado }}</td>
+                            {% if puede_administrar %}
+                                <td class="actions">
+                                    <a class="button secondary" href="{% url 'editar' reg.pk %}">Editar</a>
+                                    <a class="button danger" href="{% url 'eliminar' reg.pk %}">Eliminar</a>
+                                </td>
+                            {% endif %}
+                        </tr>
+                    {% empty %}
+                        <tr><td class="empty" colspan="{% if puede_administrar %}5{% else %}4{% endif %}">Todavía no hay retiros registrados.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+</body>
+</html>

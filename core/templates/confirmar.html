@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Confirmar eliminación | Despensa familiar</title>
+    <style>
+        body { max-width: 680px; margin: 40px auto; padding: 0 18px; color: #20302d; background: #f3f6f4; font-family: Arial, sans-serif; }
+        main { padding: 24px; border: 1px solid #d8e2dd; border-radius: 12px; background: #fff; }
+        .button { display: inline-block; border: 0; border-radius: 7px; padding: 10px 14px; color: #fff; background: #a63838; text-decoration: none; cursor: pointer; font: inherit; }
+        .secondary { color: #20302d; background: #e8efeb; }
+        .actions { display: flex; gap: 10px; margin-top: 22px; }
+    </style>
+</head>
+<body>
+    <main>
+        <h1>Ocultar registro</h1>
+        <p>¿Quieres quitar del historial el retiro de <strong>{{ registro.cantidad_solicitada }} {{ registro.producto }}</strong>?</p>
+        <p>El registro se conservará en la base de datos. Si fue aceptado, las unidades volverán al stock.</p>
+        <form method="post">
+            {% csrf_token %}
+            <div class="actions">
+                <button class="button" type="submit">Confirmar</button>
+                <a class="button secondary" href="{% url 'lista' %}">Cancelar</a>
+            </div>
+        </form>
+    </main>
+</body>
+</html>
